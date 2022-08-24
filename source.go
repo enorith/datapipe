@@ -55,7 +55,8 @@ type PagenationDataList interface {
 type DataSource[T any, K comparable] interface {
 	GetList(params Params) DataList[T]
 	GetItem(key K) (T, error)
-	Store(item T) error
+	Store(item *T) error
+	Update(key K, item *T) error
 	Delete(key K) error
 }
 
@@ -150,8 +151,19 @@ func (ds *DBSource[T, K]) GetItem(key K) (item T, err error) {
 	return
 }
 
-func (ds *DBSource[T, K]) Store(item T) error {
-	return ds.db.Create(&item).Error
+func (ds *DBSource[T, K]) Store(item *T) error {
+	return ds.db.Create(item).Error
+}
+
+func (ds *DBSource[T, K]) Update(key K, item *T) error {
+	db := ds.db.Session(&gorm.Session{})
+	if ds.pk != "" {
+		db.Where(fmt.Sprintf("%s = ?", ds.pk))
+	} else {
+		db.Model(item)
+	}
+
+	return db.Updates(item).Error
 }
 
 func (ds *DBSource[T, K]) Delete(key K) error {

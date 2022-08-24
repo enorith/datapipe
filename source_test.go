@@ -46,10 +46,11 @@ func TestGetList(t *testing.T) {
 
 func TestGetListTable(t *testing.T) {
 	param := make(datapipe.Params, 0)
-	param.WithPage(2, 5)
+	param.WithPage(1, 5)
 	param.WithScopes(func(db *gorm.DB) *gorm.DB {
+		db.Order("id DESC")
 		return db.Select([]string{
-			"id", "user_id", "nickname",
+			"id", "user_id", "nickname", "created_at",
 		})
 	})
 
@@ -66,7 +67,28 @@ func TestGetItem(t *testing.T) {
 }
 
 func TestStore(t *testing.T) {
+	var user = User{
+		Nickname:   "张三",
+		HeadImgUrl: "dddddddd.jpg",
+		Sex:        0,
+		Phone:      "13654654512",
+		Email:      "22@qq.com",
+	}
+	source.Store(&user)
+	t.Log(fmtJson(user))
+}
 
+func TestUpdate(t *testing.T) {
+	var user = User{
+		ID:         1,
+		Nickname:   "张三",
+		HeadImgUrl: "dddddddd.jpg",
+		Sex:        0,
+		Phone:      "13654654512",
+		Email:      "22@qq.com",
+	}
+	source.Update(1, &user)
+	t.Log(fmtJson(user))
 }
 
 func fmtJson(v interface{}) string {
