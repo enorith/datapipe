@@ -179,8 +179,9 @@ func (ds *DBSource[T, K]) Delete(key K) error {
 }
 
 func NewDBDataSource[T any, K comparable](db *gorm.DB) *DBSource[T, K] {
+	var model T
 
-	return &DBSource[T, K]{db: db}
+	return &DBSource[T, K]{db: db.Model(&model)}
 }
 
 func NewDBDataTableSource[T any, K comparable](db *gorm.DB, table string, pk ...string) *DBSource[T, K] {
